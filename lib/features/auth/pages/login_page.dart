@@ -47,12 +47,17 @@ class _LoginPageState extends State<LoginPage> {
                         if (_formKey.currentState!.validate()) {
                           final success =
                               await auth.login(email.text, password.text);
-                          if (success) {
+                            if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("เข้าสู่ระบบสำเร็จ")),
+                                content: Text("เข้าสู่ระบบสำเร็จ")),
                             );
-                          }
+                            } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("อีเมลหรือรหัสผ่านไม่ถูกต้อง")),
+                            );
+                            }
                         }
                       },
                       child: const Text("เข้าสู่ระบบ"),
