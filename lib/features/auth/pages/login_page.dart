@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../../../core/utils/validators.dart';
 import '../provider/auth_provider.dart';
 
@@ -48,14 +49,21 @@ class _LoginPageState extends State<LoginPage> {
                           final success =
                               await auth.login(email.text, password.text);
                             if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("เข้าสู่ระบบสำเร็จ")),
+                            Fluttertoast.showToast(
+                              msg: "เข้าสู่ระบบสำเร็จ",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.TOP,
+                              backgroundColor: Colors.green,
+                              textColor: Colors.white,
                             );
+                            Navigator.pushReplacementNamed(context, "/dashboard");
                             } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("อีเมลหรือรหัสผ่านไม่ถูกต้อง")),
+                            Fluttertoast.showToast(
+                              msg: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.TOP,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
                             );
                             }
                         }
