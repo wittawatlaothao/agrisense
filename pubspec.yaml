@@ -45,6 +45,7 @@ dependencies:
   http: ^1.1.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.10.0
   flutter_test:
     sdk: flutter
 
@@ -54,10 +55,13 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png" # ใส่ไฟล์ต้นฉบับของคุณไว้ที่นี่
+  adaptive_icon_background: "#FFFFFF" # สำหรับ Android adaptive icon (หรือใช้ image)
 # The following section is specific to Flutter packages.
 flutter:
 

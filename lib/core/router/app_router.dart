@@ -1,3 +1,4 @@
+import 'package:agrisense/core/widgets/mobile_navigation.dart';
 import 'package:flutter/material.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/register_page.dart';
@@ -14,6 +15,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginPage());
       case "/register":
         return MaterialPageRoute(builder: (_) => const RegisterPage());
+      case "/home":
+        return MaterialPageRoute(builder: (_) => const MobileNavigationScaffold());
       case "/dashboard":
         return MaterialPageRoute(builder: (_) => const DashboardPage());
       case "/profile":

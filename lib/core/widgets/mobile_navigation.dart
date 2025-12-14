@@ -110,10 +110,12 @@ class _MobileNavigationScaffoldState extends State<MobileNavigationScaffold> {
             _activeIndex = index;
           });
         },
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         cornerRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
         ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,

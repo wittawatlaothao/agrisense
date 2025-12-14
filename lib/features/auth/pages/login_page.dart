@@ -52,16 +52,16 @@ class _LoginPageState extends State<LoginPage> {
                             Fluttertoast.showToast(
                               msg: "เข้าสู่ระบบสำเร็จ",
                               toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.TOP,
+                              gravity: ToastGravity.SNACKBAR,
                               backgroundColor: Colors.green,
                               textColor: Colors.white,
                             );
-                            Navigator.pushReplacementNamed(context, "/dashboard");
+                            Navigator.pushReplacementNamed(context, "/home");
                             } else {
                             Fluttertoast.showToast(
                               msg: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
                               toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.TOP,
+                              gravity: ToastGravity.SNACKBAR,
                               backgroundColor: Colors.red,
                               textColor: Colors.white,
                             );

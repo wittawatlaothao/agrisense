@@ -96,7 +96,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       _isUploading = true;
       _result = null;
     });
-    final uri = Uri.parse('http://localhost:8000/predict');
+    final uri = Uri.parse('https://agrisense-ai-dev.up.railway.app/predict');
     try {
       final request = http.MultipartRequest('POST', uri);
       request.files.add(await http.MultipartFile.fromPath('file', file.path));
@@ -106,6 +106,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         setState(() {
           _result = body;
         });
+        Navigator.pushReplacementNamed(context, "/home");
       } else {
         _showError('Server error: ${response.statusCode}\n$body');
       }
@@ -147,47 +148,67 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                   : const Text('ไม่พบกล้องหรือกำลังโหลด...'),
             ),
           ),
-          Padding(
+            Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _isUploading ? null : _pickImageAndUpload,
-                      icon: const Icon(Icons.upload_file),
-                      label: const Text('อัปโหลด'),
-                    ),
-                    FloatingActionButton(
-                      onPressed: _isUploading ? null : _takePictureAndUpload,
-                      child: const Icon(Icons.camera_alt),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _isUploading
-                          ? null
-                          : () async {
-                              // switch camera
-                              if (_cameras == null || _cameras!.length < 2) return;
-                              final current = _controller!.description;
-                              final index = _cameras!.indexWhere((c) => c.name == current.name);
-                              final next = _cameras![(index + 1) % _cameras!.length];
-                              await _initController(next);
-                            },
-                      icon: const Icon(Icons.flip_camera_android),
-                      label: const Text('สลับ'),
-                    ),
-                  ],
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                // Left aligned
+                Expanded(
+                  child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton.icon(
+                    onPressed: _isUploading ? null : _pickImageAndUpload,
+                    icon: const Icon(Icons.upload_file),
+                    label: const Text('อัปโหลด'),
+                  ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                if (_isUploading) const LinearProgressIndicator(),
-                if (_result != null) ...[
-                  const SizedBox(height: 8),
-                  Text('ผลลัพธ์: $_result'),
+
+                // Centered
+                Expanded(
+                  child: Center(
+                  child: FloatingActionButton(
+                    onPressed: _isUploading ? null : _takePictureAndUpload,
+                    child: const Icon(Icons.camera_alt),
+                  ),
+                  ),
+                ),
+
+                // Right aligned
+                Expanded(
+                  child: Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: _isUploading
+                      ? null
+                      : () async {
+                        // switch camera
+                        if (_cameras == null || _cameras!.length < 2) return;
+                        final current = _controller!.description;
+                        final index = _cameras!.indexWhere((c) => c.name == current.name);
+                        final next = _cameras![(index + 1) % _cameras!.length];
+                        await _initController(next);
+                      },
+                    icon: const Icon(Icons.flip_camera_android),
+                    label: const Text('สลับ'),
+                  ),
+                  ),
+                ),
                 ],
+              ),
+              ...[const SizedBox(height: 8),
+              Text(''),],
+              if (_isUploading) const LinearProgressIndicator(),
+              if (_result != null) ...[
+                const SizedBox(height: 8),
+                Text('ผลลัพธ์: $_result'),
+              ],
               ],
             ),
-          )
+            )
         ],
       ),
     );
