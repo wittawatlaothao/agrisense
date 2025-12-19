@@ -21,60 +21,156 @@ class _LoginPageState extends State<LoginPage> {
     final auth = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("เข้าสู่ระบบ Agrisense")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: email,
-                validator: Validators.email,
-                decoration: const InputDecoration(labelText: "อีเมล"),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: password,
-                obscureText: true,
-                validator: Validators.password,
-                decoration: const InputDecoration(labelText: "รหัสผ่าน"),
-              ),
-              const SizedBox(height: 24),
-              auth.isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          final success =
-                              await auth.login(email.text, password.text);
-                            if (success) {
-                            Fluttertoast.showToast(
-                              msg: "เข้าสู่ระบบสำเร็จ",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.SNACKBAR,
-                              backgroundColor: Colors.green,
-                              textColor: Colors.white,
-                            );
-                            Navigator.pushReplacementNamed(context, "/home");
-                            } else {
-                            Fluttertoast.showToast(
-                              msg: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.SNACKBAR,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                            );
-                            }
-                        }
-                      },
-                      child: const Text("เข้าสู่ระบบ"),
-                    ),
-              TextButton(
-                onPressed: () => Navigator.pushNamed(context, "/register"),
-                child: const Text("ยังไม่มีบัญชี? สมัครสมาชิก"),
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.green.shade400,
+              Colors.green.shade700,
             ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.agriculture,
+                          size: 64,
+                          color: Colors.green.shade700,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "เข้าสู่ระบบ",
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Agrisense",
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        TextFormField(
+                          controller: email,
+                          validator: Validators.email,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: "อีเมล",
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: password,
+                          obscureText: true,
+                          validator: Validators.password,
+                          decoration: InputDecoration(
+                            labelText: "รหัสผ่าน",
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        auth.isLoading
+                            ? const CircularProgressIndicator()
+                            : SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      final success =
+                                          await auth.login(email.text, password.text);
+                                      if (success) {
+                                        Fluttertoast.showToast(
+                                          msg: "เข้าสู่ระบบสำเร็จ",
+                                          toastLength: Toast.LENGTH_LONG,
+                                          gravity: ToastGravity.TOP,
+                                          backgroundColor: Colors.green,
+                                          textColor: Colors.white,
+                                        );
+                                        Navigator.pushReplacementNamed(context, "/home");
+                                      } else {
+                                        Fluttertoast.showToast(
+                                          msg: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+                                          toastLength: Toast.LENGTH_LONG,
+                                          gravity: ToastGravity.TOP,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade600,
+                                    foregroundColor: Colors.white,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "เข้าสู่ระบบ",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "ยังไม่มีบัญชี? ",
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pushNamed(context, "/register"),
+                              child: const Text(
+                                "สมัครสมาชิก",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

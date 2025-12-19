@@ -6,7 +6,6 @@ class AuthProvider with ChangeNotifier {
   final _repo = AuthRepository();
 
   bool isLoading = false;
-  String? errorMessage;
 
   Future<bool> login(String email, String password) async {
     isLoading = true;
@@ -18,7 +17,6 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return result;
     } catch (e) {
-      errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
       return false;
@@ -35,7 +33,6 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return result;
     } catch (e) {
-      errorMessage = e.toString();
       isLoading = false;
       notifyListeners();
       return false;

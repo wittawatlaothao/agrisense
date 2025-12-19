@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -106,8 +106,19 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         setState(() {
           _result = body;
         });
-        Navigator.pushReplacementNamed(context, "/home");
-      } else {
+        final data = jsonDecode(body);
+        final prediction = data["prediction"];
+        
+        Navigator.pushReplacementNamed(
+          context,
+          "/predict_result",
+          arguments: {
+            "image": file,
+            "label": prediction["label"],
+            "confidence": prediction["confidence"],
+          },
+        );
+        } else {
         _showError('Server error: ${response.statusCode}\n$body');
       }
     } catch (e) {
@@ -199,13 +210,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                 ),
                 ],
               ),
-              ...[const SizedBox(height: 8),
+              ...[const SizedBox(height: 3),
               Text(''),],
               if (_isUploading) const LinearProgressIndicator(),
-              if (_result != null) ...[
-                const SizedBox(height: 8),
-                Text('ผลลัพธ์: $_result'),
-              ],
+              ...[const SizedBox(height: 3),
+              Text(''),],
               ],
             ),
             )
