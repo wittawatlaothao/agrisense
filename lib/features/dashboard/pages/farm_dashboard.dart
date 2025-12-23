@@ -1,38 +1,64 @@
+import 'package:agrisense/core/services/realtime_database_service.dart';
+import 'package:agrisense/data/models/sensor_data_model.dart';
 import 'package:agrisense/features/dashboard/pages/device_card.dart';
 import 'package:agrisense/features/dashboard/pages/sensor_card.dart';
 import 'package:flutter/material.dart';
 
 class FarmDashboard extends StatelessWidget {
   final String farmId;
+  final RealtimeDatabaseService _realtimeService = RealtimeDatabaseService();
 
-  const FarmDashboard({super.key, required this.farmId});
-
-  Stream<Map<String, dynamic>> fakeFarmStream(String farmId) async* {
-    while (true) {
-      await Future.delayed(const Duration(seconds: 2));
-
-      yield {
-        "ph": (6 + (farmId.hashCode % 2)) + (0.1 * (DateTime.now().second % 5)),
-        "temperature": 25 + (DateTime.now().second % 5),
-        "light": 800 + (DateTime.now().second * 5),
-        "water": 60 + (DateTime.now().second % 10),
-        "led": DateTime.now().second % 2 == 0,
-        "pump": DateTime.now().second % 3 == 0,
-        "fog": DateTime.now().second % 4 == 0,
-      };
-    }
-  }
+  FarmDashboard({super.key, required this.farmId});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: fakeFarmStream(farmId),
+    return StreamBuilder<SensorDataModel?>(
+      stream: _realtimeService.getDeviceDataStream(farmId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final data = snapshot.data!;
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('เกิดข้อผิดพลาด: ${snapshot.error}'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Trigger rebuild
+                    (context as Element).markNeedsBuild();
+                  },
+                  child: const Text('ลองอีกครั้ง'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final data = snapshot.data;
+
+        if (data == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.device_unknown, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text('ไม่พบข้อมูลอุปกรณ์ $farmId'),
+                const SizedBox(height: 8),
+                const Text(
+                  'โปรดตรวจสอบว่าอุปกรณ์เชื่อมต่ออยู่',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
 
         return GridView(
           padding: const EdgeInsets.all(16),
@@ -45,48 +71,51 @@ class FarmDashboard extends StatelessWidget {
           children: [
             SensorCard(
               title: "ค่า pH",
-              value: data["ph"],
+              value: data.sensors.ph,
               unit: "",
               icon: Icons.science,
               color: Colors.purple,
             ),
             SensorCard(
               title: "อุณหภูมิ",
-              value: data["temperature"],
+              value: data.sensors.temperature,
               unit: "°C",
               icon: Icons.thermostat,
               color: Colors.orange,
             ),
             SensorCard(
               title: "แสง",
-              value: data["light"],
+              value: data.sensors.light,
               unit: "lux",
               icon: Icons.wb_sunny,
               color: Colors.amber,
             ),
             SensorCard(
               title: "ระดับน้ำ",
-              value: data["water"],
+              value: data.sensors.waterLevel,
               unit: "%",
               icon: Icons.water,
               color: Colors.blue,
             ),
             DeviceCard(
               title: "LED",
-              isOn: data["led"],
+              isOn: data.devices.led,
               icon: Icons.lightbulb,
-              onToggle: (v) {},
+              onToggle: (value) async {
+                await _realtimeService.updateLED(farmId, value);
+              },
             ),
             DeviceCard(
               title: "ปั๊มน้ำ",
-              isOn: data["pump"],
+              isOn: data.devices.waterPump,
               icon: Icons.waterfall_chart,
-              onToggle: (v) {},
+              onToggle: (value) async {
+                await _realtimeService.updateWaterPump(farmId, value);
+              },
             ),
           ],
         );
       },
     );
   }
-
 }

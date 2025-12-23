@@ -13,21 +13,47 @@ class DeviceService {
         throw Exception('User not logged in');
       }
 
-      final docRef = _db
+      // 1. บันทึกใน subcollection: users/{userId}/devices/{deviceId}
+      final userDeviceRef = _db
           .collection('users')
           .doc(userId)
           .collection('devices')
           .doc(device.deviceId);
+
+      // 2. บันทึกใน top-level collection: devices/{deviceId}
+      final globalDeviceRef = _db.collection('devices').doc(device.deviceId);
+
+      // เตรียมข้อมูลแยกกัน
+      final userDeviceData = {
+        'deviceId': device.deviceId,
+        'deviceName': device.deviceName,
+        'createdAt': device.createdAt.toIso8601String(),
+        // ไม่เก็บ userId ใน subcollection
+      };
+
+      final globalDeviceData = {
+        'deviceId': device.deviceId,
+        'deviceName': device.deviceName,
+        'userId': userId, // เก็บ userId เฉพาะใน top-level collection
+        'createdAt': device.createdAt.toIso8601String(),
+      };
+
+      // Batch write เพื่อให้ทั้ง 2 ที่สำเร็จพร้อมกัน
+      final batch = _db.batch();
+      batch.set(userDeviceRef, userDeviceData);
+      batch.set(globalDeviceRef, globalDeviceData);
       
-      await docRef.set(device.toMap(), SetOptions(merge: false));
-      
-      final savedDoc = await docRef.get();
+      await batch.commit();
+
+      // Verify
+      final savedDoc = await userDeviceRef.get();
       return savedDoc.exists;
     } catch (e) {
       rethrow;
     }
   }
 
+  // Query จาก subcollection (devices ของ user เฉพาะ)
   Future<List<DeviceModel>> getUserDevices() async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -44,6 +70,17 @@ class DeviceService {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  // Query จาก top-level collection (device โดยตรง)
+  Future<DeviceModel?> getDeviceById(String deviceId) async {
+    try {
+      final doc = await _db.collection('devices').doc(deviceId).get();
+      if (!doc.exists) return null;
+      return DeviceModel.fromMap(doc.data()!);
+    } catch (e) {
+      return null;
     }
   }
 

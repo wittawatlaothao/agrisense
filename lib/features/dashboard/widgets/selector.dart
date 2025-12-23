@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
+import '../../../data/models/device_model.dart';
 
-class FarmSelector extends StatelessWidget {
-  final List<Map<String, String>> farms;
-  final String selectedFarmId;
-  final ValueChanged<String> onFarmChanged;
-  final VoidCallback? onAddFarm;
+class DeviceSelector extends StatelessWidget {
+  final List<DeviceModel> devices;
+  final String? selectedDeviceId;
+  final ValueChanged<String> onDeviceChanged;
+  final VoidCallback? onAddDevice;
   final double? width;
 
-  const FarmSelector({
+  const DeviceSelector({
     super.key,
-    required this.farms,
-    required this.selectedFarmId,
-    required this.onFarmChanged,
-    this.onAddFarm,
+    required this.devices,
+    this.selectedDeviceId,
+    required this.onDeviceChanged,
+    this.onAddDevice,
     this.width,
   });
 
-  String get selectedFarmName =>
-      farms.firstWhere((f) => f["id"] == selectedFarmId)["name"]!;
+  String get selectedDeviceName {
+    if (selectedDeviceId == null || devices.isEmpty) return 'ไม่มีอุปกรณ์';
+    try {
+      return devices.firstWhere((d) => d.deviceId == selectedDeviceId).deviceName;
+    } catch (e) {
+      return 'ไม่มีอุปกรณ์';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,77 +44,110 @@ class FarmSelector extends StatelessWidget {
                 minWidth: selectorWidth - 70,
                 maxWidth: selectorWidth - 70,
               ),
-              onSelected: onFarmChanged,
-              itemBuilder: (context) => farms
-            .map(
-              (farm) => PopupMenuItem(
-                value: farm["id"],
+              enabled: devices.isNotEmpty,
+              onSelected: onDeviceChanged,
+              itemBuilder: (context) => devices.isEmpty
+                  ? [
+                      const PopupMenuItem(
+                        enabled: false,
+                        child: Text(
+                          'ไม่มีอุปกรณ์',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    ]
+                  : devices
+                      .map(
+                        (device) => PopupMenuItem(
+                          value: device.deviceId,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.sensors,
+                                color: selectedDeviceId == device.deviceId
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      device.deviceName,
+                                      style: TextStyle(
+                                        fontWeight: selectedDeviceId == device.deviceId
+                                            ? FontWeight.bold
+                                            : FontWeight.w600,
+                                        color: selectedDeviceId == device.deviceId
+                                            ? Theme.of(context).primaryColor
+                                            : null,
+                                      ),
+                                    ),
+                                    Text(
+                                      device.deviceId,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
                 child: Row(
                   children: [
                     Icon(
-                      Icons.agriculture,
-                      color: selectedFarmId == farm["id"]
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey,
+                      devices.isEmpty ? Icons.sensors_off : Icons.sensors,
+                      color: devices.isEmpty ? Colors.grey : Colors.green,
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      farm["name"]!,
-                      style: TextStyle(
-                        fontWeight: selectedFarmId == farm["id"]
-                            ? FontWeight.bold
-                            : FontWeight.w600,
-                        color: selectedFarmId == farm["id"]
-                            ? Theme.of(context).primaryColor
-                            : null,
+                    Expanded(
+                      child: Text(
+                        selectedDeviceName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: devices.isEmpty ? Colors.grey : null,
+                        ),
                       ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: devices.isEmpty ? Colors.grey : null,
                     ),
                   ],
                 ),
               ),
-            )
-            .toList(),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.agriculture, color: Colors.grey),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  selectedFarmName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey),
-            ],
-          ),
-        ),
             ),
           ),
-          if (onAddFarm != null) ...[
+          if (onAddDevice != null) ...[
             const SizedBox(width: 12),
             Material(
               color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(16),
               elevation: 2,
               child: InkWell(
-                onTap: onAddFarm,
+                onTap: onAddDevice,
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   width: 56,
