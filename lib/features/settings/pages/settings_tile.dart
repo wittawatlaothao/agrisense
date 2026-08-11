@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-class ProfileTile extends StatelessWidget {
+class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
 
-  const ProfileTile({
+  const SettingsTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.onTap,

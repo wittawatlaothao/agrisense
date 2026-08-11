@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:circle_nav_bar/circle_nav_bar.dart';
 import '../../features/dashboard/pages/dashboard_page.dart';
 import '../../features/camera/pages/camera_page.dart';
-import '../../features/profile/pages/profile_page.dart';
+import '../../features/report/pages/report_page.dart';
+import '../../features/settings/pages/settings_page.dart';
 
 class _NavItem {
   final String label;
@@ -37,22 +38,28 @@ class _MobileNavigationScaffoldState extends State<MobileNavigationScaffold> {
 
   static const List<_NavItem> items = [
     _NavItem(
-      label: 'Dashboard',
+      label: 'แดชบอร์ด',
       icon: Icons.dashboard,
       route: '/dashboard',
       page: DashboardPage(),
     ),
     _NavItem(
-      label: 'Camera',
+      label: 'กล้อง',
       icon: Icons.camera_alt,
       route: '/camera',
       page: CameraPage(),
     ),
     _NavItem(
-      label: 'Profile',
-      icon: Icons.person,
-      route: '/profile',
-      page: ProfilePage(),
+      label: 'แจ้งเตือน',
+      icon: Icons.notifications,
+      route: '/notifications',
+      page: ReportPage(),
+    ),
+    _NavItem(
+      label: 'ตั้งค่า',
+      icon: Icons.settings,
+      route: '/settings',
+      page: SettingsPage(),
     ),
   ];
 
@@ -82,14 +89,16 @@ class _MobileNavigationScaffoldState extends State<MobileNavigationScaffold> {
         activeIcons: const [
           Icon(Icons.dashboard, color: Colors.white),
           Icon(Icons.camera_alt, color: Colors.white),
-          Icon(Icons.person, color: Colors.white),
+          Icon(Icons.notifications, color: Colors.white),
+          Icon(Icons.settings, color: Colors.white),
         ],
         inactiveIcons: const [
           Icon(Icons.dashboard, color: Colors.white),
           Icon(Icons.camera_alt, color: Colors.white),
-          Icon(Icons.person, color: Colors.white),
+          Icon(Icons.notifications, color: Colors.white),
+          Icon(Icons.settings, color: Colors.white),
         ],
-        levels: const ["Dashboard", "Camera", "Profile"],
+        levels: const ["แดชบอร์ด", "กล้อง", "แจ้งเตือน", "ตั้งค่า"],
         activeLevelsStyle: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,

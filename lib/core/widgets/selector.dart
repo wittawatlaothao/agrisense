@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/device_model.dart';
+import '../../data/models/board_model.dart';
 
-class DeviceSelector extends StatelessWidget {
-  final List<DeviceModel> devices;
-  final String? selectedDeviceId;
-  final ValueChanged<String> onDeviceChanged;
-  final VoidCallback? onAddDevice;
+class BoardSelector extends StatelessWidget {
+  final List<BoardModel> boards;
+  final String? selectedBoardId;
+  final ValueChanged<String> onBoardChanged;
+  final VoidCallback? onAddBoard;
   final double? width;
 
-  const DeviceSelector({
+  const BoardSelector({
     super.key,
-    required this.devices,
-    this.selectedDeviceId,
-    required this.onDeviceChanged,
-    this.onAddDevice,
+    required this.boards,
+    this.selectedBoardId,
+    required this.onBoardChanged,
+    this.onAddBoard,
     this.width,
   });
 
-  String get selectedDeviceName {
-    if (selectedDeviceId == null || devices.isEmpty) return 'ไม่มีอุปกรณ์';
+  String get selectedBoardName {
+    if (selectedBoardId == null || boards.isEmpty) return 'ไม่มีอุปกรณ์';
     try {
-      return devices.firstWhere((d) => d.deviceId == selectedDeviceId).deviceName;
+      return boards.firstWhere((d) => d.boardId == selectedBoardId).boardName;
     } catch (e) {
       return 'ไม่มีอุปกรณ์';
     }
@@ -29,6 +29,7 @@ class DeviceSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectorWidth = width ?? MediaQuery.of(context).size.width - 32;
+    final popupWidth = onAddBoard != null ? selectorWidth - 70 : selectorWidth;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -41,12 +42,12 @@ class DeviceSelector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               constraints: BoxConstraints(
-                minWidth: selectorWidth - 70,
-                maxWidth: selectorWidth - 70,
+                minWidth: popupWidth,
+                maxWidth: popupWidth,
               ),
-              enabled: devices.isNotEmpty,
-              onSelected: onDeviceChanged,
-              itemBuilder: (context) => devices.isEmpty
+              enabled: boards.isNotEmpty,
+              onSelected: onBoardChanged,
+              itemBuilder: (context) => boards.isEmpty
                   ? [
                       const PopupMenuItem(
                         enabled: false,
@@ -56,15 +57,15 @@ class DeviceSelector extends StatelessWidget {
                         ),
                       )
                     ]
-                  : devices
+                  : boards
                       .map(
-                        (device) => PopupMenuItem(
-                          value: device.deviceId,
+                        (board) => PopupMenuItem(
+                          value: board.boardId,
                           child: Row(
                             children: [
                               Icon(
                                 Icons.sensors,
-                                color: selectedDeviceId == device.deviceId
+                                color: selectedBoardId == board.boardId
                                     ? Theme.of(context).primaryColor
                                     : Colors.grey,
                               ),
@@ -75,18 +76,18 @@ class DeviceSelector extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      device.deviceName,
+                                      board.boardName,
                                       style: TextStyle(
-                                        fontWeight: selectedDeviceId == device.deviceId
+                                        fontWeight: selectedBoardId == board.boardId
                                             ? FontWeight.bold
                                             : FontWeight.w600,
-                                        color: selectedDeviceId == device.deviceId
+                                        color: selectedBoardId == board.boardId
                                             ? Theme.of(context).primaryColor
                                             : null,
                                       ),
                                     ),
                                     Text(
-                                      device.deviceId,
+                                      board.boardId,
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: Colors.grey[600],
@@ -117,37 +118,37 @@ class DeviceSelector extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      devices.isEmpty ? Icons.sensors_off : Icons.sensors,
-                      color: devices.isEmpty ? Colors.grey : Colors.green,
+                      boards.isEmpty ? Icons.sensors_off : Icons.sensors,
+                      color: boards.isEmpty ? Colors.grey : Colors.green,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        selectedDeviceName,
+                        selectedBoardName,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
-                          color: devices.isEmpty ? Colors.grey : null,
+                          color: boards.isEmpty ? Colors.grey : null,
                         ),
                       ),
                     ),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: devices.isEmpty ? Colors.grey : null,
+                      color: boards.isEmpty ? Colors.grey : null,
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          if (onAddDevice != null) ...[
+          if (onAddBoard != null) ...[
             const SizedBox(width: 12),
             Material(
               color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(16),
               elevation: 2,
               child: InkWell(
-                onTap: onAddDevice,
+                onTap: onAddBoard,
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   width: 56,

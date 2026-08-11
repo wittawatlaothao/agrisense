@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth, User;
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../core/utils/validators.dart';
@@ -15,10 +17,44 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final password = TextEditingController();
+  StreamSubscription<User?>? _authSub;
+  bool _hasNavigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null && mounted && !_hasNavigated) {
+        _hasNavigated = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          Navigator.pushReplacementNamed(context, "/home");
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthProvider>(context);
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null && !_hasNavigated) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, "/home");
+      });
+    }
+
+    final auth = context.read<AuthProvider>();
+    final isLoading = context.select<AuthProvider, bool>((p) => p.isLoading);
 
     return Scaffold(
       body: Container(
@@ -99,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        auth.isLoading
+                        isLoading
                             ? const CircularProgressIndicator()
                             : SizedBox(
                                 width: double.infinity,
@@ -117,7 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                                           backgroundColor: Colors.green,
                                           textColor: Colors.white,
                                         );
-                                        Navigator.pushReplacementNamed(context, "/home");
                                       } else {
                                         Fluttertoast.showToast(
                                           msg: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",

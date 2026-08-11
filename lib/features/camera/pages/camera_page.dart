@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart';
+import '../../../data/repositories/prediction_history_service.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -17,7 +19,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   List<CameraDescription>? _cameras;
   bool _isInitialized = false;
   bool _isUploading = false;
+  bool _isFlashOn = false;
   String? _result;
+  final PredictionHistoryService _historyService = PredictionHistoryService();
 
   @override
   void initState() {
@@ -99,25 +103,85 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     final uri = Uri.parse('https://agrisense-ai-dev.up.railway.app/predict');
     try {
       final request = http.MultipartRequest('POST', uri);
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      request.files.add(await http.MultipartFile.fromPath(
+        'files',
+        file.path,
+        contentType: http.MediaType('image', 'jpeg'),
+      ));
       final response = await request.send();
       final body = await response.stream.bytesToString();
       if (response.statusCode == 200) {
         setState(() {
           _result = body;
         });
-        final data = jsonDecode(body);
-        final prediction = data["prediction"];
         
-        Navigator.pushReplacementNamed(
-          context,
-          "/predict_result",
-          arguments: {
-            "image": file,
-            "label": prediction["label"],
-            "confidence": prediction["confidence"],
-          },
-        );
+        try {
+          final data = jsonDecode(body);
+          final predictions = data["predictions"] as List?;
+          
+          if (predictions == null || predictions.isEmpty) {
+            _showError('ไม่พบผลการวิเคราะห์');
+            return;
+          }
+          
+          final firstPrediction = predictions.first as Map<String, dynamic>;
+          final prediction = firstPrediction["prediction"] as Map<String, dynamic>?;
+          
+          if (prediction == null) {
+            _showError('ไม่พบข้อมูล prediction');
+            return;
+          }
+          
+          final label = prediction["label"] as String?;
+          final confidence = prediction["confidence"] as num?;
+          
+          if (label == null || confidence == null) {
+            _showError('ข้อมูล prediction ไม่สมบูรณ์');
+            return;
+          }
+          
+          final probabilities = (prediction["probabilities"] as Map<String, dynamic>?) ?? {};
+          
+          // Upload รูปไป Firebase Storage
+          String? imageUrl;
+          try {
+            final storageRef = FirebaseStorage.instance
+                .ref()
+                .child('predictions')
+                .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+            await storageRef.putFile(file);
+            imageUrl = await storageRef.getDownloadURL();
+          } catch (e) {
+            print('Failed to upload image: $e');
+          }
+          
+          // บันทึกประวัติการ predict พร้อม imageUrl และ probabilities
+          try {
+            await _historyService.savePrediction(
+              label: label,
+              confidence: confidence.toDouble(),
+              imageUrl: imageUrl,
+              probabilities: probabilities.isNotEmpty ? probabilities : null,
+            );
+          } catch (e) {
+            print('Failed to save history: $e');
+          }
+          
+          if (!mounted) return;
+          
+          Navigator.pushReplacementNamed(
+            context,
+            "/predict_result",
+            arguments: {
+              "image": file,
+              "label": label,
+              "confidence": confidence.toDouble(),
+              "probabilities": probabilities,
+            },
+          );
+        } catch (e) {
+          _showError('Error parsing response: $e');
+        }
         } else {
         _showError('Server error: ${response.statusCode}\n$body');
       }
@@ -149,7 +213,34 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera')),
+      appBar: AppBar(
+        title: const Text('กล้อง'),
+        actions: [
+          IconButton(
+            icon: Icon(_isFlashOn ? Icons.flash_on : Icons.flash_off),
+            tooltip: _isFlashOn ? 'ปิดแฟลช' : 'เปิดแฟลช',
+            onPressed: () async {
+              if (_controller == null || !_controller!.value.isInitialized) return;
+              try {
+                final newMode = _isFlashOn ? FlashMode.off : FlashMode.torch;
+                await _controller!.setFlashMode(newMode);
+                setState(() {
+                  _isFlashOn = !_isFlashOn;
+                });
+              } catch (e) {
+                // Flash not supported
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'ประวัติการตรวจสอบ',
+            onPressed: () {
+              Navigator.pushNamed(context, '/history');
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

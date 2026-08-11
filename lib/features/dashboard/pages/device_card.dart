@@ -4,14 +4,18 @@ class DeviceCard extends StatelessWidget {
   final String title;
   final bool isOn;
   final IconData icon;
-  final ValueChanged<bool> onToggle;
+  final ValueChanged<bool>? onToggle;
+  final bool enabled;
+  final String? mode;
 
   const DeviceCard({
     super.key,
     required this.title,
     required this.isOn,
     required this.icon,
-    required this.onToggle,
+    this.onToggle,
+    this.enabled = true,
+    this.mode,
   });
 
   @override
@@ -39,13 +43,39 @@ class DeviceCard extends StatelessWidget {
               color: color,
             ),
           ),
+          if (mode != null && mode != 'manual')
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'โหมด: ${_getModeText(mode!)}',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
           Switch(
             value: isOn,
             activeColor: Colors.green,
-            onChanged: onToggle,
+            onChanged: enabled && mode == 'manual' ? onToggle : null,
           )
         ],
       ),
     );
+  }
+
+  String _getModeText(String mode) {
+    switch (mode) {
+      case 'manual':
+        return 'ควบคุมเอง';
+      case 'condition':
+        return 'เงื่อนไข';
+      case 'schedule':
+        return 'ตามเวลา';
+      case 'auto':
+        return 'อัตโนมัติ';
+      default:
+        return mode;
+    }
   }
 }

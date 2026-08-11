@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/services/device_service.dart';
-import '../../../data/models/device_model.dart';
+import '../../../core/services/board_service.dart';
+import '../../../data/models/board_model.dart';
 
-class AddDevicePage extends StatefulWidget {
-  final String scannedDeviceId;
+class AddBoardPage extends StatefulWidget {
+  final String scannedBoardId;
 
-  const AddDevicePage({
+  const AddBoardPage({
     super.key,
-    required this.scannedDeviceId,
+    required this.scannedBoardId,
   });
 
   @override
-  State<AddDevicePage> createState() => _AddDevicePageState();
+  State<AddBoardPage> createState() => _AddBoardPageState();
 }
 
-class _AddDevicePageState extends State<AddDevicePage> {
+class _AddBoardPageState extends State<AddBoardPage> {
   final _formKey = GlobalKey<FormState>();
-  final _deviceNameController = TextEditingController();
-  final _deviceService = DeviceService();
+  final _boardNameController = TextEditingController();
+  final _boardService = BoardService();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _deviceNameController.dispose();
+    _boardNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveDevice() async {
+  Future<void> _saveBoard() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -36,13 +36,13 @@ class _AddDevicePageState extends State<AddDevicePage> {
     });
 
     try {
-      final device = DeviceModel(
-        deviceId: widget.scannedDeviceId,
-        deviceName: _deviceNameController.text.trim(),
+      final board = BoardModel(
+        boardId: widget.scannedBoardId,
+        boardName: _boardNameController.text.trim(),
         createdAt: DateTime.now(),
       );
 
-      final success = await _deviceService.addDevice(device);
+      final success = await _boardService.addBoard(board);
 
       if (!mounted) return;
 
@@ -127,7 +127,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
 
               // Device ID Field (Read-only)
               TextFormField(
-                initialValue: widget.scannedDeviceId,
+                initialValue: widget.scannedBoardId,
                 decoration: const InputDecoration(
                   labelText: 'รหัสอุปกรณ์',
                   prefixIcon: Icon(Icons.qr_code),
@@ -144,7 +144,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
 
               // Device Name Field
               TextFormField(
-                controller: _deviceNameController,
+                controller: _boardNameController,
                 decoration: const InputDecoration(
                   labelText: 'ชื่ออุปกรณ์',
                   hintText: 'เช่น เซ็นเซอร์ในโรงเรือน A',
@@ -168,7 +168,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
               SizedBox(
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveDevice,
+                  onPressed: _isLoading ? null : _saveBoard,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,

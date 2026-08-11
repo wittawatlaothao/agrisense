@@ -19,12 +19,15 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
-          final user = snapshot.data;
-          if (user != null) {
+          
+          if (snapshot.hasData) {
             return const MobileNavigationScaffold();
           }
+
           return const LoginPage();
         },
       ),

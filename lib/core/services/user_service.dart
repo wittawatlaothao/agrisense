@@ -13,4 +13,12 @@ class UserService {
     if (!doc.exists) return null;
     return UserModel.fromMap(doc.data()!);
   }
+
+  /// บันทึก FCM Token ของ user ลง Firestore
+  Future<void> saveFcmToken(String uid, String token) async {
+    await _db.doc(uid).set({
+      'fcmToken': token,
+      'tokenUpdatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
 }

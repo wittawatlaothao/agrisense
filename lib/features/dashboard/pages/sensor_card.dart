@@ -50,7 +50,9 @@ class SensorCard extends StatelessWidget {
             ),
           ),
           Text(
-            "${value.toStringAsFixed(1)} $unit",
+            value is String
+                ? value
+                : "${value.toStringAsFixed(1)} $unit",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 24,

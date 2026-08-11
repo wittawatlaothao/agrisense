@@ -66,32 +66,36 @@ class DeviceControls {
 
 class SensorReadings {
   final double light;
-  final double ph;
+  final double tds;
   final double temperature;
   final double waterLevel;
+  final double humidity;
 
   SensorReadings({
     required this.light,
-    required this.ph,
+    required this.tds,
     required this.temperature,
     required this.waterLevel,
+    required this.humidity,
   });
 
   factory SensorReadings.fromMap(Map<dynamic, dynamic> map) {
     return SensorReadings(
       light: (map['light'] ?? 0).toDouble(),
-      ph: (map['ph'] ?? 0).toDouble(),
+      tds: (map['tds'] ?? 0).toDouble(),
       temperature: (map['temperature'] ?? 0).toDouble(),
       waterLevel: (map['water_level'] ?? 0).toDouble(),
+      humidity: (map['humidity'] ?? 0).toDouble(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'light': light,
-      'ph': ph,
+      'tds': tds,
       'temperature': temperature,
       'water_level': waterLevel,
+      'humidity': humidity,
     };
   }
 }
